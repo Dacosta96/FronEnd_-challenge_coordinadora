@@ -23,7 +23,7 @@ const navItems: NavItem[] = [
     name: "Envios",
     subItems: [
       { name: "Asignaciones", path: "/", pro: false },
-      { name: "Rutas", path: "/rutes", pro: false },
+      { name: "Rutas", path: "/routes", pro: false },
     ],
   },
 ];

@@ -14,6 +14,7 @@ import BarChart from "./pages/Charts/BarChart";
 import ProfilePage from "./components/UserProfile/profileClerk";
 import TrackingPage from "./pages/pageHome/pageTracking";
 import ShipmentDetails from "./pages/pageHome/pageDetailsTracking";
+import AvailableRoutes from "./pages/Dashboard/PageRoutes";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
+              <Route index path="/routes" element={<AvailableRoutes />} />
               <Route path="/profile-admin" element={<ProfilePage />} />
               <Route path="/indicators" element={<LineChart />} />
               <Route path="/graphics" element={<BarChart />} />
