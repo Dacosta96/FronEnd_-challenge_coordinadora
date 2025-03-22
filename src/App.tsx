@@ -6,23 +6,14 @@ import Home from "./pages/Dashboard/Home";
 import AppLayout from "./layout/AppLayout";
 import PublicLayout from "./layout/PublicLayout";
 import PageHome from "./pages/pageHome/pageHome";
-//import ProtectedRoute from "./routes/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import { ScrollToTop } from "./components/common/ScrollToTop";
-import UserProfiles from "./pages/UserProfiles";
-import Blank from "./pages/Blank";
-import FormElements from "./pages/Forms/FormElements";
-import BasicTables from "./pages/Tables/BasicTables";
-import Alerts from "./pages/UiElements/Alerts";
-import Avatars from "./pages/UiElements/Avatars";
-import Badges from "./pages/UiElements/Badges";
-import Buttons from "./pages/UiElements/Buttons";
-import Images from "./pages/UiElements/Images";
-import Videos from "./pages/UiElements/Videos";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
-import Calendar from "./pages/Calendar";
+import ProfilePage from "./components/UserProfile/profileClerk";
+import TrackingPage from "./pages/pageHome/pageTracking";
+import ShipmentDetails from "./pages/pageHome/pageDetailsTracking";
 
 export default function App() {
   return (
@@ -35,19 +26,9 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
-              <Route path="/profile" element={<UserProfiles />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/blank" element={<Blank />} />
-              <Route path="/form-elements" element={<FormElements />} />
-              <Route path="/basic-tables" element={<BasicTables />} />
-              <Route path="/alerts" element={<Alerts />} />
-              <Route path="/avatars" element={<Avatars />} />
-              <Route path="/badge" element={<Badges />} />
-              <Route path="/buttons" element={<Buttons />} />
-              <Route path="/images" element={<Images />} />
-              <Route path="/videos" element={<Videos />} />
-              <Route path="/line-chart" element={<LineChart />} />
-              <Route path="/bar-chart" element={<BarChart />} />
+              <Route path="/profile-admin" element={<ProfilePage />} />
+              <Route path="/indicators" element={<LineChart />} />
+              <Route path="/graphics" element={<BarChart />} />
             </Route>
           </Route>
 
@@ -55,6 +36,12 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
             <Route element={<PublicLayout />}>
               <Route path="/home" element={<PageHome />} />
+              <Route path="/profile-user" element={<ProfilePage />} />
+              <Route path="/tracking" element={<TrackingPage />} />
+              <Route
+                path="/tracking/:trackingId"
+                element={<ShipmentDetails />}
+              />
             </Route>
           </Route>
 

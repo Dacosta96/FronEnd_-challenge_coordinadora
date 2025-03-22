@@ -9,7 +9,7 @@ const PublicLayout: React.FC = () => {
       <AppHeaderPublic />
 
       {/* Contenido principal - Ocupa todo el ancho y espacio disponible */}
-      <main className="flex-1 w-full p-8 bg-white shadow-lg flex justify-center">
+      <main className="flex-1 w-full p-8 bg-white shadow-lg flex justify-center overflow-hidden">
         <Outlet />
       </main>
 

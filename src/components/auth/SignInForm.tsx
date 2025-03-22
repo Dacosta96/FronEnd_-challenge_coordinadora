@@ -9,7 +9,7 @@ import Button from "../ui/button/Button";
 export default function SignInForm() {
   const { signIn, isLoaded } = useSignIn();
   const { isSignedIn } = useAuth();
-  const { user, isLoaded: isUserLoaded } = useUser();
+  const { user } = useUser();
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -22,8 +22,17 @@ export default function SignInForm() {
 
   useEffect(() => {
     if (isSignedIn && user) {
-      const userRole = user.publicMetadata?.role as string;
-      navigate(userRole === "ADMIN" ? "/" : "/home");
+      //console.log("Datos del usuario:", user);
+      //console.log("publicMetadata:", user.publicMetadata);
+
+      const userRole = user.publicMetadata?.rol as string;
+      console.log("Rol del usuario:", userRole);
+
+      if (userRole === "ADMIN") {
+        navigate("/");
+      } else {
+        navigate("/home");
+      }
     }
   }, [isSignedIn, user, navigate]);
 
@@ -45,27 +54,14 @@ export default function SignInForm() {
 
       if (result.status === "complete") {
         console.log("Inicio de sesión exitoso");
-
-        // Esperar a que la sesión del usuario se actualice
-        const checkUser = async () => {
-          while (!isUserLoaded) {
-            await new Promise((resolve) => setTimeout(resolve, 500)); // Esperar 500ms
-          }
-          if (user) {
-            console.log("Usuario cargado:", user);
-            const userRole = user.publicMetadata?.role as string;
-            console.log("Rol del usuario:", userRole);
-            navigate(userRole === "ADMIN" ? "/" : "/home");
-          }
-        };
-
-        checkUser();
+        window.location.reload(); // 🔄 Forzar actualización de la sesión
       }
     } catch (err) {
       setError("Credenciales incorrectas. Intenta de nuevo.");
       console.error("Error de autenticación:", err);
     }
   };
+
   return (
     <div className="flex flex-col flex-1">
       <div className="w-full max-w-md pt-10 mx-auto"></div>
