@@ -2,62 +2,56 @@ import { BrowserRouter as Router, Routes, Route } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
-import UserProfiles from "./pages/UserProfiles";
-import Videos from "./pages/UiElements/Videos";
-import Images from "./pages/UiElements/Images";
-import Alerts from "./pages/UiElements/Alerts";
-import Badges from "./pages/UiElements/Badges";
-import Avatars from "./pages/UiElements/Avatars";
-import Buttons from "./pages/UiElements/Buttons";
+import Home from "./pages/Dashboard/Home";
+import AppLayout from "./layout/AppLayout";
+import PublicLayout from "./layout/PublicLayout";
+import PageHome from "./pages/pageHome/pageHome";
+import { ToastContainer } from "react-toastify";
+import ProtectedRoute from "./components/routes/ProtectedRoute";
+import { ScrollToTop } from "./components/common/ScrollToTop";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
-import Calendar from "./pages/Calendar";
-import BasicTables from "./pages/Tables/BasicTables";
-import FormElements from "./pages/Forms/FormElements";
-import Blank from "./pages/Blank";
-import AppLayout from "./layout/AppLayout";
-import { ScrollToTop } from "./components/common/ScrollToTop";
-import Home from "./pages/Dashboard/Home";
+import ProfilePage from "./components/UserProfile/profileClerk";
+import TrackingPage from "./pages/pageHome/pageTracking";
+import ShipmentDetails from "./pages/pageHome/pageDetailsTracking";
+import AvailableRoutes from "./pages/Dashboard/PageRoutes";
 
 export default function App() {
   return (
     <>
+      <ToastContainer />
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
-
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
-
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
-
-            {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
-
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
-
-            {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
+          {/* Rutas protegidas para usuarios con rol "admin" */}
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+            <Route element={<AppLayout />}>
+              <Route index path="/" element={<Home />} />
+              <Route index path="/routes" element={<AvailableRoutes />} />
+              <Route path="/profile-admin" element={<ProfilePage />} />
+              <Route path="/indicators" element={<LineChart />} />
+              <Route path="/graphics" element={<BarChart />} />
+            </Route>
           </Route>
 
-          {/* Auth Layout */}
+          {/* Rutas protegidas para usuarios con rol "user" */}
+          <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
+            <Route element={<PublicLayout />}>
+              <Route path="/home" element={<PageHome />} />
+              <Route path="/profile-user" element={<ProfilePage />} />
+              <Route path="/tracking" element={<TrackingPage />} />
+              <Route
+                path="/tracking/:trackingId"
+                element={<ShipmentDetails />}
+              />
+            </Route>
+          </Route>
+
+          {/* Rutas de autenticación */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
 
-          {/* Fallback Route */}
+          {/* Ruta por defecto */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
