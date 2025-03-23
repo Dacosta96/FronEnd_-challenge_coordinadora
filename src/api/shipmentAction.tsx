@@ -36,3 +36,26 @@ export const getShipmentsByUserId = async (userId: string): Promise<any> => {
   }
   return { shipments: [] };
 };
+
+export const getShipmentById = async (
+  shipmentId: string,
+  userId: number
+): Promise<any> => {
+  try {
+    console.log("Getting shipment", { shipmentId, userId });
+
+    // Llamada a la API con ambos parámetros
+    const response = await axios.get(
+      `${API_URL}shipments/${shipmentId}?user_id=${userId}`
+    );
+    if (response.status !== 200) {
+      console.error("Error getting shipment");
+      return { shipments: [] };
+    }
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    console.error("Error getting shipment");
+  }
+  return { shipments: [] };
+};

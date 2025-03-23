@@ -1,5 +1,5 @@
 import { JSX, useState, useEffect } from "react";
-import { toast } from "react-toastify";
+//import { toast } from "react-toastify";
 import {
   DataGrid,
   GridToolbarContainer,
@@ -11,7 +11,10 @@ import Button from "../../components/ui/button/Button";
 import { useNavigate } from "react-router";
 import { useUser } from "@clerk/clerk-react";
 import { getUserByEmail } from "../../api/usersAction";
-import { getShipmentsByUserId } from "../../api/shipmentAction";
+import {
+  getShipmentById,
+  getShipmentsByUserId,
+} from "../../api/shipmentAction";
 
 export default function TrackingPage() {
   const { user } = useUser();
@@ -26,43 +29,66 @@ export default function TrackingPage() {
     page: 0,
     pageSize: 10,
   });
+  const [userId, setUserId] = useState<number | null>(null);
   const isSmallScreen = useMediaQuery("(max-width: 768px)");
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        if (userEmail !== "No disponible") {
-          const user_id = await getUserByEmail(userEmail);
+  const fetchUserData = async () => {
+    try {
+      if (userEmail !== "No disponible") {
+        const user_id = await getUserByEmail(userEmail);
+        setUserId(user_id.id);
+        if (user_id) {
+          const userShipments = await getShipmentsByUserId(user_id.id);
 
-          if (user_id) {
-            console.log("User ID:", user_id.id);
-            const userShipments = await getShipmentsByUserId(user_id.id);
-            console.log("User Shipments:", userShipments);
-            setShipments(userShipments);
-            setPagination((prev) => ({
-              ...prev,
-              total: userShipments.length,
-            }));
-          }
+          // Mapeo de estados en inglés a español
+          const statusTranslation: Record<string, string> = {
+            WAITING: "Pendiente",
+            delivered: "Entregado",
+            in_transit: "En tránsito",
+            canceled: "Cancelado",
+            failed: "Fallido",
+          };
+
+          // Asegurar que cada objeto tenga formattedAddress y current_status traducido
+          const transformedShipments = userShipments.map((shipment: any) => ({
+            ...shipment,
+            formattedAddress:
+              shipment.google_map_address?.formattedAddress || "No disponible",
+            current_status:
+              statusTranslation[shipment.current_status] || "Desconocido",
+          }));
+
+          setShipments(transformedShipments);
+          setPagination((prev) => ({
+            ...prev,
+            total: transformedShipments.length,
+          }));
         }
-      } catch (error) {
-        console.error("Error obteniendo datos:", error);
       }
-    };
-
+    } catch (error) {
+      console.error("Error obteniendo datos:", error);
+    }
+  };
+  useEffect(() => {
     fetchUserData();
   }, [userEmail]);
 
   const handleSearch = async () => {
     if (!searchId.trim()) {
-      toast.error("Ingrese un ID de envío válido");
+      fetchUserData();
       return;
+    }
+    try {
+      const response = await getShipmentById(searchId, userId || 0);
+      setShipments(response);
+    } catch (error) {
+      console.error("Error obteniendo datos:", error);
     }
   };
 
   const columns = [
-    { field: "id", headerName: "ID Envío", flex: 1 },
-    !isSmallScreen && { field: "weight", headerName: "Peso (kg)", flex: 1 },
+    { field: "id", headerName: "ID Envío", width: 100 },
+    !isSmallScreen && { field: "weight", headerName: "Peso (kg)", width: 200 },
     !isSmallScreen && {
       field: "formattedAddress",
       headerName: "Destino",
@@ -77,20 +103,23 @@ export default function TrackingPage() {
       field: "details",
       headerName: "Detalles",
       width: 100,
-      renderCell: (params: { row: { trackingId: string } }) => (
-        <IconButton color="primary" onClick={() => handleDetails(params.row)}>
-          <svg
-            className="fill-current"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M19 3H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" />
-            <path d="M7 9h10v2H7zM7 13h7v2H7z" />
-          </svg>
-        </IconButton>
-      ),
+      renderCell: (params: any) => {
+        console.log("Fila de datos:", params.row);
+        return (
+          <IconButton color="primary" onClick={() => handleDetails(params.row)}>
+            <svg
+              className="fill-current"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M19 3H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" />
+              <path d="M7 9h10v2H7zM7 13h7v2H7z" />
+            </svg>
+          </IconButton>
+        );
+      },
     },
   ].filter(Boolean) as Array<{
     field: string;
@@ -101,9 +130,9 @@ export default function TrackingPage() {
   }>;
 
   // Función para manejar el clic en "Detalles"
-  const handleDetails = (shipment: { trackingId: string }) => {
+  const handleDetails = (shipment: any) => {
     //toast.info(`Detalles del envío: ${shipment.trackingId}`);
-    navigate(`/tracking/${shipment.trackingId}`);
+    navigate(`/tracking/${shipment.id}`);
   };
 
   const CustomToolbar = () => (
@@ -139,25 +168,27 @@ export default function TrackingPage() {
       </div>
 
       {/* Tabla de envíos */}
-      <DataGrid
-        slots={{ toolbar: CustomToolbar }} // Usa toolbar sin Export ni Density
-        rows={shipments}
-        columns={columns}
-        getRowId={(row) => row.id}
-        pageSizeOptions={[10, 20, 50, 100]}
-        paginationModel={{
-          page: pagination.page,
-          pageSize: pagination.pageSize,
-        }}
-        rowCount={pagination.total}
-        paginationMode="client"
-        sx={{
-          maxHeight: "65vh",
-          "& .MuiDataGrid-root": {
-            overflowX: "auto", // Permite desplazamiento horizontal si es necesario
-          },
-        }}
-      />
+      {shipments.length === 0 ? (
+        <p>Cargando envíos...</p>
+      ) : (
+        <DataGrid
+          slots={{ toolbar: CustomToolbar }}
+          rows={shipments}
+          columns={columns}
+          getRowId={(row) => row.id}
+          pageSizeOptions={[10, 20, 50, 100]}
+          paginationModel={{
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+          }}
+          rowCount={pagination.total}
+          paginationMode="client"
+          sx={{
+            maxHeight: "65vh",
+            "& .MuiDataGrid-root": { overflowX: "auto" },
+          }}
+        />
+      )}
     </div>
   );
 }
