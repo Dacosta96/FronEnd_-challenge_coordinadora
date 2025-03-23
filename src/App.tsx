@@ -24,7 +24,7 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           {/* Rutas protegidas para usuarios con rol "admin" */}
-          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
               <Route index path="/routes" element={<AvailableRoutes />} />
@@ -35,7 +35,7 @@ export default function App() {
           </Route>
 
           {/* Rutas protegidas para usuarios con rol "user" */}
-          <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
+          <Route element={<ProtectedRoute allowedRoles={["USER"]} />}>
             <Route element={<PublicLayout />}>
               <Route path="/home" element={<PageHome />} />
               <Route path="/profile-user" element={<ProfilePage />} />
