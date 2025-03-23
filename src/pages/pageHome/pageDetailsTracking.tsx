@@ -28,6 +28,7 @@ async function getShipmentDetails(
   const response = await axios.get(
     `http://localhost:4000/api/shipments/${trackingId}/details`
   );
+  console.log("response details", response);
   return response.data;
 }
 
