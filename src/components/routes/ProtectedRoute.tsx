@@ -11,7 +11,7 @@ export default function ProtectedRoute({
 
   if (!isLoaded) return <p>Cargando...</p>; // Evitar errores antes de cargar
 
-  const userRole = user?.publicMetadata?.rol as string;
+  const userRole = user?.publicMetadata?.role as string;
 
   console.log("Usuario autenticado:", user);
   console.log("Rol del usuario:", userRole);
