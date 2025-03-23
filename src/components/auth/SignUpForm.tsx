@@ -5,6 +5,9 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import { createUser } from "../../api/usersAction";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -12,7 +15,7 @@ export default function SignUpForm() {
     email: "",
     password: "",
   });
-
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,7 +35,9 @@ export default function SignUpForm() {
         password: formData.password,
         role: "user",
       });
-      console.log("Registro exitoso:", response.data);
+      console.log("Registro exitoso:", response);
+      toast.success("Usuario registrado correctamente");
+      navigate("/signin");
       // Redirigir o mostrar mensaje de éxito
     } catch (error) {
       console.error("Error al registrar:", error);

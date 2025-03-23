@@ -13,9 +13,6 @@ export default function ProtectedRoute({
 
   const userRole = user?.publicMetadata?.role as string;
 
-  console.log("Usuario autenticado:", user);
-  console.log("Rol del usuario:", userRole);
-
   if (!isSignedIn) return <Navigate to="/signin" replace />;
   if (!allowedRoles.includes(userRole))
     return <Navigate to="/signin" replace />;

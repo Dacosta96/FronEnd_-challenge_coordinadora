@@ -1,4 +1,4 @@
-import { JSX, useState } from "react";
+import { JSX, useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import {
   DataGrid,
@@ -9,82 +9,70 @@ import {
 import { IconButton, useMediaQuery } from "@mui/material";
 import Button from "../../components/ui/button/Button";
 import { useNavigate } from "react-router";
-
-const initialShipments = [
-  {
-    id: "1",
-    trackingId: "ABC123",
-    status: "En tránsito",
-    weight: "2kg",
-    destination: "Madrid",
-  },
-  {
-    id: "2",
-    trackingId: "DEF456",
-    status: "Entregado",
-    weight: "5kg",
-    destination: "Barcelona",
-  },
-  {
-    id: "3",
-    trackingId: "GHI789",
-    status: "Pendiente",
-    weight: "3.5kg",
-    destination: "Valencia",
-  },
-  {
-    id: "4",
-    trackingId: "JKL012",
-    status: "En tránsito",
-    weight: "7kg",
-    destination: "Sevilla",
-  },
-  {
-    id: "5",
-    trackingId: "MNO345",
-    status: "Cancelado",
-    weight: "1kg",
-    destination: "Bilbao",
-  },
-];
+import { useUser } from "@clerk/clerk-react";
+import { getUserByEmail } from "../../api/usersAction";
+import { getShipmentsByUserId } from "../../api/shipmentAction";
 
 export default function TrackingPage() {
+  const { user } = useUser();
+  const userEmail = user?.primaryEmailAddress?.emailAddress || "No disponible";
   const navigate = useNavigate();
   const [searchId, setSearchId] = useState("");
-  const [shipments, setShipments] = useState(initialShipments);
+  const [shipments, setShipments] = useState<
+    { id: string; [key: string]: any }[]
+  >([]);
   const [pagination, setPagination] = useState({
-    total: initialShipments.length,
+    total: 0,
     page: 0,
     pageSize: 10,
   });
+  const isSmallScreen = useMediaQuery("(max-width: 768px)");
 
-  const isSmallScreen = useMediaQuery("(max-width: 768px)"); // Detecta pantallas pequeñas
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (userEmail !== "No disponible") {
+          const user_id = await getUserByEmail(userEmail);
+
+          if (user_id) {
+            console.log("User ID:", user_id.id);
+            const userShipments = await getShipmentsByUserId(user_id.id);
+            console.log("User Shipments:", userShipments);
+            setShipments(userShipments);
+            setPagination((prev) => ({
+              ...prev,
+              total: userShipments.length,
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Error obteniendo datos:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [userEmail]);
 
   const handleSearch = async () => {
     if (!searchId.trim()) {
       toast.error("Ingrese un ID de envío válido");
       return;
     }
-
-    const foundShipment = initialShipments.find(
-      (s) => s.trackingId === searchId
-    );
-
-    if (foundShipment) {
-      setShipments([foundShipment]);
-      setPagination((prev) => ({ ...prev, total: 1, page: 0 }));
-    } else {
-      toast.error("No se encontró el envío");
-      setShipments([]);
-      setPagination((prev) => ({ ...prev, total: 0, page: 0 }));
-    }
   };
 
   const columns = [
-    { field: "trackingId", headerName: "ID Envío", flex: 1 },
+    { field: "id", headerName: "ID Envío", flex: 1 },
     !isSmallScreen && { field: "weight", headerName: "Peso (kg)", flex: 1 },
-    !isSmallScreen && { field: "destination", headerName: "Destino", flex: 1 },
-    !isSmallScreen && { field: "status", headerName: "Estado", flex: 1 },
+    !isSmallScreen && {
+      field: "formattedAddress",
+      headerName: "Destino",
+      flex: 1,
+    },
+    !isSmallScreen && {
+      field: "current_status",
+      headerName: "Estado",
+      flex: 1,
+    },
     {
       field: "details",
       headerName: "Detalles",
