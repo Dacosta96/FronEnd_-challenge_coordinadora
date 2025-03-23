@@ -25,10 +25,10 @@ export default function SignInForm() {
       //console.log("Datos del usuario:", user);
       //console.log("publicMetadata:", user.publicMetadata);
 
-      const userRole = user.publicMetadata?.rol as string;
+      const userRole = user.publicMetadata?.role as string;
       console.log("Rol del usuario:", userRole);
 
-      if (userRole === "ADMIN") {
+      if (userRole === "admin") {
         navigate("/");
       } else {
         navigate("/home");

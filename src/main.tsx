@@ -9,8 +9,7 @@ import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { ClerkProvider } from "@clerk/clerk-react";
 
-const PUBLISHABLE_KEY =
-  "pk_test_bW9yZS1iYXJuYWNsZS01MS5jbGVyay5hY2NvdW50cy5kZXYk";
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
