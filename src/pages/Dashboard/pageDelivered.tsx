@@ -6,64 +6,61 @@ import {
   GridToolbarContainer,
   GridToolbarFilterButton,
 } from "@mui/x-data-grid";
-import { Button, Select, MenuItem } from "@mui/material";
+import { Button, Checkbox } from "@mui/material";
 import {
-  createRouteAssignment,
   createShipmentHistory,
-  getRoutes,
-  getShipmentsWaiting,
-  updateShipmentStatus,
+  getShipmentsInTransit,
+  updateShipmentDelivered,
 } from "../../api/shipmentAction";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ShipmentCreatedHistoryDTO } from "../../api/dto/shipment-dto";
 
 interface Order {
-  id: string;
+  id: number;
   customer: string;
   address: string;
   status: string;
-  route?: string;
 }
 
-const OrdersAdmin: React.FC = () => {
+const DeliveredAdmin: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [routes, setRoutes] = useState<{ id: string; destination: string }[]>(
-    []
-  );
-  const [editedOrders, setEditedOrders] = useState<Record<string, string>>({});
+  const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
   const [pagination, setPagination] = useState({
     total: 0,
     page: 0,
     pageSize: 10,
   });
 
-  // Maneja cambios en la selección de ruta
-  const handleRouteChange = (orderId: string, newRoute: string) => {
-    setEditedOrders((prev) => ({ ...prev, [orderId]: newRoute }));
+  // Maneja la selección de órdenes
+  const handleSelectOrder = (orderId: number) => {
+    setSelectedOrders((prev) =>
+      prev.includes(orderId)
+        ? prev.filter((id) => id !== orderId)
+        : [...prev, orderId]
+    );
   };
-  console.log("editedOrders", editedOrders);
 
   const handleSaveChanges = async () => {
-    try {
-      for (const [orderId, routeId] of Object.entries(editedOrders)) {
-        // Primero, actualizar el estado del envío
-        await updateShipmentStatus(Number(orderId), "IN_TRANSIT");
+    console.log("selectedOrders", selectedOrders);
+    if (selectedOrders.length === 0) return;
 
-        // Luego, asignar la ruta al envío
-        await createRouteAssignment(Number(orderId), Number(routeId));
+    try {
+      for (const orderId of selectedOrders) {
+        await updateShipmentDelivered(orderId);
 
         // crear historial
         const shipmentHistoryData: ShipmentCreatedHistoryDTO = {
           shipment_id: Number(orderId),
-          status: "En Transito",
+          status: "Entregado",
         };
         const historyResponse = await createShipmentHistory(
           shipmentHistoryData
         );
         console.log("Respuesta de creación de historial:", historyResponse);
       }
-      toast.success("Asignaciones creadas correctamente", {
+
+      toast.success("Órdenes marcadas como entregadas", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -73,21 +70,17 @@ const OrdersAdmin: React.FC = () => {
         style: { marginTop: "80px" },
       });
 
-      console.log(
-        "Todos los envíos actualizados y asignaciones de ruta creadas correctamente."
-      );
+      // Limpiar selección y recargar datos
+      setSelectedOrders([]);
+      fetchShipmentsData();
     } catch (error) {
-      console.error("Error en el proceso de actualización:", error);
+      console.error("Error actualizando estado:", error);
     }
-
-    setEditedOrders({});
-    fetchShipmentsData();
-    fetchRoutes();
   };
 
   const fetchShipmentsData = async () => {
     try {
-      const userShipments = await getShipmentsWaiting();
+      const userShipments = await getShipmentsInTransit();
 
       // Mapeo de direcciones
       const mappedOrders = userShipments.map((order: any) => ({
@@ -107,25 +100,9 @@ const OrdersAdmin: React.FC = () => {
       console.error("Error obteniendo datos:", error);
     }
   };
-  const fetchRoutes = async () => {
-    try {
-      const responseRoutes = await getRoutes();
-      // Guardar id y destination en un array de objetos
-      const destinations = responseRoutes.map(
-        (route: { id: string; destination: string }) => ({
-          id: route.id,
-          destination: route.destination,
-        })
-      );
 
-      setRoutes(destinations);
-    } catch (error) {
-      console.error("Error obteniendo datos:", error);
-    }
-  };
   useEffect(() => {
     fetchShipmentsData();
-    fetchRoutes();
   }, []);
   // Definición de columnas del DataGrid
   const columns: GridColDef[] = [
@@ -134,28 +111,19 @@ const OrdersAdmin: React.FC = () => {
     { field: "address", headerName: "Dirección", width: 250 },
     { field: "currentStatus", headerName: "Estado", width: 150 },
     {
-      field: "route",
-      headerName: "Asignar Ruta",
-      width: 200,
+      field: "select",
+      headerName: "",
+      width: 50,
+      sortable: false,
       renderCell: (params) => (
-        <Select
-          value={editedOrders[params.id as string] ?? params.value ?? ""}
-          onChange={(e) =>
-            handleRouteChange(params.id as string, e.target.value)
-          }
-          size="small"
-          fullWidth
-        >
-          <MenuItem value="">Selecciona una ruta</MenuItem>
-          {routes.map((route) => (
-            <MenuItem key={route.id} value={route.id}>
-              {route.destination}
-            </MenuItem>
-          ))}
-        </Select>
+        <Checkbox
+          checked={selectedOrders.includes(params.id as number)}
+          onChange={() => handleSelectOrder(params.id as number)}
+        />
       ),
     },
   ];
+
   const CustomToolbar = () => (
     <GridToolbarContainer>
       <GridToolbarColumnsButton />
@@ -165,7 +133,7 @@ const OrdersAdmin: React.FC = () => {
 
   return (
     <div style={{ height: 400, width: "100%" }}>
-      <h2 className="text-lg font-semibold mb-4">Órdenes Pendientes</h2>
+      <h2 className="text-lg font-semibold mb-4">Órdenes En transito</h2>
       <DataGrid
         slots={{ toolbar: CustomToolbar }}
         rows={orders}
@@ -194,12 +162,12 @@ const OrdersAdmin: React.FC = () => {
         color="primary"
         onClick={handleSaveChanges}
         sx={{ mt: 2 }}
-        disabled={Object.keys(editedOrders).length === 0}
+        disabled={selectedOrders.length === 0}
       >
-        Guardar cambios
+        Marcar como Entregado
       </Button>
     </div>
   );
 };
 
-export default OrdersAdmin;
+export default DeliveredAdmin;

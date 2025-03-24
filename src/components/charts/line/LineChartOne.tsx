@@ -1,119 +1,87 @@
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
+import { useEffect, useState } from "react";
+import { getgraphics01 } from "../../../api/shipmentAction";
 
 export default function LineChartOne() {
+  const [series, setSeries] = useState<{ name: string; data: number[] }[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  const fetchShipmentsData = async () => {
+    try {
+      const data = await getgraphics01();
+
+      const sortedData = data.sort(
+        (a: any, b: any) =>
+          new Date(a.shipmentDate).getTime() -
+          new Date(b.shipmentDate).getTime()
+      );
+
+      const formattedDates = sortedData.map((item: any) => {
+        const date = new Date(item.shipmentDate);
+        return `${date.getDate()} ${date.toLocaleString("default", {
+          month: "short",
+        })}`;
+      });
+
+      const shipments = sortedData.map((item: any) => item.totalShipments);
+
+      setCategories(formattedDates);
+      setSeries([{ name: "Shipments", data: shipments }]);
+    } catch (error) {
+      console.error("Error obteniendo datos:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchShipmentsData();
+  }, []);
+
   const options: ApexOptions = {
-    legend: {
-      show: false, // Hide legend
-      position: "top",
-      horizontalAlign: "left",
-    },
-    colors: ["#465FFF", "#9CB9FF"], // Define line colors
+    legend: { show: false },
+    colors: ["#465FFF"],
     chart: {
       fontFamily: "Outfit, sans-serif",
       height: 310,
-      type: "line", // Set the chart type to 'line'
-      toolbar: {
-        show: false, // Hide chart toolbar
-      },
+      type: "line",
+      toolbar: { show: false },
     },
     stroke: {
-      curve: "straight", // Define the line style (straight, smooth, or step)
-      width: [2, 2], // Line width for each dataset
+      curve: "smooth", // Hacer la línea más fluida
+      width: 3, // Aumentar grosor de la línea
+      colors: ["#465FFF"], // Asegurar color sólido
     },
-
     fill: {
-      type: "gradient",
-      gradient: {
-        opacityFrom: 0.55,
-        opacityTo: 0,
-      },
+      type: "solid", // Evitar que la línea se desvanezca
     },
     markers: {
-      size: 0, // Size of the marker points
-      strokeColors: "#fff", // Marker border color
+      size: 5, // Aumentar tamaño de los puntos
+      strokeColors: "#fff",
       strokeWidth: 2,
-      hover: {
-        size: 6, // Marker size on hover
-      },
+      hover: { size: 7 },
     },
     grid: {
-      xaxis: {
-        lines: {
-          show: false, // Hide grid lines on x-axis
-        },
-      },
-      yaxis: {
-        lines: {
-          show: true, // Show grid lines on y-axis
-        },
-      },
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: true } },
     },
-    dataLabels: {
-      enabled: false, // Disable data labels
-    },
-    tooltip: {
-      enabled: true, // Enable tooltip
-      x: {
-        format: "dd MMM yyyy", // Format for x-axis tooltip
-      },
-    },
+    dataLabels: { enabled: false },
+    tooltip: { enabled: true, x: { format: "dd MMM yyyy" } },
     xaxis: {
-      type: "category", // Category-based x-axis
-      categories: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
-      axisBorder: {
-        show: false, // Hide x-axis border
-      },
-      axisTicks: {
-        show: false, // Hide x-axis ticks
-      },
-      tooltip: {
-        enabled: false, // Disable tooltip for x-axis points
-      },
+      type: "category",
+      categories: categories,
+      axisBorder: { show: false },
+      axisTicks: { show: false },
     },
     yaxis: {
-      labels: {
-        style: {
-          fontSize: "12px", // Adjust font size for y-axis labels
-          colors: ["#6B7280"], // Color of the labels
-        },
-      },
-      title: {
-        text: "", // Remove y-axis title
-        style: {
-          fontSize: "0px",
-        },
-      },
+      labels: { style: { fontSize: "12px", colors: ["#6B7280"] } },
+      title: { text: "", style: { fontSize: "0px" } },
     },
   };
 
-  const series = [
-    {
-      name: "Sales",
-      data: [180, 190, 170, 160, 175, 165, 170, 205, 230, 210, 240, 235],
-    },
-    {
-      name: "Revenue",
-      data: [40, 30, 50, 40, 55, 40, 70, 100, 110, 120, 150, 140],
-    },
-  ];
   return (
     <div className="max-w-full overflow-x-auto custom-scrollbar">
       <div id="chartEight" className="min-w-[1000px]">
-        <Chart options={options} series={series} type="area" height={310} />
+        <Chart options={options} series={series} type="line" height={310} />
       </div>
     </div>
   );
