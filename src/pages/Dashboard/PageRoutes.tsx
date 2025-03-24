@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import { getRoutes } from "../../api/shipmentAction";
 
 interface Route {
   id: string;
@@ -9,38 +10,26 @@ interface Route {
   driver: string;
 }
 
-const routes: Route[] = [
-  {
-    id: "1",
-    departureTime: "08:00 AM",
-    sector: "Norte",
-    city: "Ciudad A",
-    driver: "Carlos Gómez",
-  },
-  {
-    id: "2",
-    departureTime: "09:30 AM",
-    sector: "Sur",
-    city: "Ciudad B",
-    driver: "Ana Rodríguez",
-  },
-  {
-    id: "3",
-    departureTime: "11:00 AM",
-    sector: "Oriente",
-    city: "Ciudad C",
-    driver: "Luis Fernández",
-  },
-];
-
 const AvailableRoutes: React.FC = () => {
+  const [routes, setRoutes] = useState<Route[]>([]);
   const columns: GridColDef[] = [
-    { field: "departureTime", headerName: "Hora de Salida", flex: 1 },
-    { field: "sector", headerName: "Sector", flex: 1 },
-    { field: "city", headerName: "Ciudad", flex: 1 },
-    { field: "driver", headerName: "Conductor", flex: 1 },
+    { field: "id", headerName: "ID", flex: 1 },
+    { field: "origin", headerName: "Origen", flex: 1 },
+    { field: "destination", headerName: "Sector", flex: 1 },
+    { field: "estimatedTime", headerName: "Timpo promedio(hr)", flex: 1 },
   ];
 
+  const fetchRoutesData = async () => {
+    try {
+      const responseRoutes = await getRoutes();
+      setRoutes(responseRoutes);
+    } catch (error) {
+      console.error("Error obteniendo datos:", error);
+    }
+  };
+  useEffect(() => {
+    fetchRoutesData();
+  }, []);
   return (
     <div style={{ height: 500, width: "100%" }}>
       <h2 className="text-lg font-semibold mb-4">Rutas Disponibles</h2>

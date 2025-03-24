@@ -238,7 +238,7 @@ function ShipmentDetails() {
                       </p>
                       <p>
                         <span className="font-medium">
-                          Tiempo de Entrega (min):
+                          Tiempo de Entrega (Hr):
                         </span>{" "}
                         {metric.deliveryTimeMinutes}
                       </p>

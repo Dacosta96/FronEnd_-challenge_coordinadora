@@ -7,8 +7,12 @@ import { getUserByEmail } from "../../api/usersAction";
 import {
   createShipment,
   createShipmentHistory,
+  createShipmentMetrics,
 } from "../../api/shipmentAction";
-import { ShipmentCreatedHistoryDTO } from "../../api/dto/shipment-dto";
+import {
+  ShipmentCreatedHistoryDTO,
+  ShipmentCreatedMetricsDTO,
+} from "../../api/dto/shipment-dto";
 
 export default function PageHome() {
   const { user } = useUser();
@@ -113,8 +117,15 @@ export default function PageHome() {
         status: "En espera",
       };
 
+      const shipmentMetricsData: ShipmentCreatedMetricsDTO = {
+        shipment_id: response.shipment.id,
+        delivery_time_minutes: 48,
+      };
+
       const historyResponse = await createShipmentHistory(shipmentHistoryData);
+      const metricsResponse = await createShipmentMetrics(shipmentMetricsData);
       console.log("Respuesta de creación de historial:", historyResponse);
+      console.log("Respuesta de creación de métricas:", metricsResponse);
       toast.success("Envío registrado correctamente");
       setLoading(false);
       // Resetear el formulario
