@@ -8,11 +8,13 @@ import {
 } from "@mui/x-data-grid";
 import { Button, Checkbox } from "@mui/material";
 import {
+  createShipmentHistory,
   getShipmentsInTransit,
   updateShipmentDelivered,
 } from "../../api/shipmentAction";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ShipmentCreatedHistoryDTO } from "../../api/dto/shipment-dto";
 
 interface Order {
   id: number;
@@ -46,6 +48,16 @@ const DeliveredAdmin: React.FC = () => {
     try {
       for (const orderId of selectedOrders) {
         await updateShipmentDelivered(orderId);
+
+        // crear historial
+        const shipmentHistoryData: ShipmentCreatedHistoryDTO = {
+          shipment_id: Number(orderId),
+          status: "Entregado",
+        };
+        const historyResponse = await createShipmentHistory(
+          shipmentHistoryData
+        );
+        console.log("Respuesta de creación de historial:", historyResponse);
       }
 
       toast.success("Órdenes marcadas como entregadas", {

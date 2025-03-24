@@ -11,6 +11,7 @@ import AutoRefreshCounter from "./AutoRefreshCounter";
 import axios from "axios";
 import { Skeleton } from "@mui/material";
 import { ShipmentDetailsDTO } from "../../api/dto/shipment-dto";
+import { useAuth } from "@clerk/clerk-react";
 
 const queryClient = new QueryClient();
 
@@ -23,12 +24,18 @@ export default function ShipmentDetailsWrap() {
 }
 
 async function getShipmentDetails(
-  trackingId: string
+  trackingId: string,
+  token: string
 ): Promise<ShipmentDetailsDTO> {
   const response = await axios.get(
-    `http://localhost:4000/api/shipments/${trackingId}/details`
+    `http://localhost:4000/api/shipments/${trackingId}/details`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
-  console.log("response details", response);
+  // console.log("response details", response);
   return response.data;
 }
 
@@ -74,6 +81,8 @@ function ShipmentDetails() {
   const { trackingId } = useParams<{ trackingId: string }>();
   const navigate = useNavigate();
 
+  const { getToken } = useAuth();
+
   const {
     data: shipment,
     isLoading,
@@ -82,9 +91,18 @@ function ShipmentDetails() {
     refetch,
   } = useQuery({
     queryKey: ["shipment", trackingId],
-    queryFn: () => getShipmentDetails(trackingId || "-1"),
+    queryFn: () => getShipmentDetailsAuthorized(trackingId || "-1"),
     enabled: !!trackingId,
   });
+
+  const getShipmentDetailsAuthorized = async (trackingId = "-1") => {
+    const token = await getToken();
+    if (!token) {
+      toast.error("No se pudo obtener el token de autenticación.");
+      return Promise.reject("No token available");
+    }
+    return getShipmentDetails(trackingId, token);
+  };
 
   useEffect(() => {
     if (isError) {
