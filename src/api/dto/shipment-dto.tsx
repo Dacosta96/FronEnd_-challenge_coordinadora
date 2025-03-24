@@ -51,3 +51,8 @@ export interface ShipmentCreatedHistoryDTO {
   shipment_id: number;
   status: string;
 }
+
+export interface ShipmentCreatedMetricsDTO {
+  shipment_id: number;
+  delivery_time_minutes: number;
+}

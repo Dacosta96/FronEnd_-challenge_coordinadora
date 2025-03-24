@@ -9,12 +9,13 @@ import PageHome from "./pages/pageHome/pageHome";
 import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import { ScrollToTop } from "./components/common/ScrollToTop";
-import LineChart from "./pages/Charts/LineChart";
-import BarChart from "./pages/Charts/BarChart";
 import ProfilePage from "./components/UserProfile/profileClerk";
 import TrackingPage from "./pages/pageHome/pageTracking";
 import ShipmentDetails from "./pages/pageHome/pageDetailsTracking";
 import AvailableRoutes from "./pages/Dashboard/PageRoutes";
+import ViewShipments from "./pages/Dashboard/viewShipments";
+import KPIComponent from "./pages/Charts/Indicators";
+import Graphics from "./pages/Charts/Graphics";
 
 export default function App() {
   return (
@@ -27,10 +28,11 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
+              <Route index path="/viewOrdes" element={<ViewShipments />} />
               <Route index path="/routes" element={<AvailableRoutes />} />
               <Route path="/profile-admin" element={<ProfilePage />} />
-              <Route path="/indicators" element={<LineChart />} />
-              <Route path="/graphics" element={<BarChart />} />
+              <Route path="/indicators" element={<KPIComponent />} />
+              <Route path="/graphics" element={<Graphics />} />
             </Route>
           </Route>
 

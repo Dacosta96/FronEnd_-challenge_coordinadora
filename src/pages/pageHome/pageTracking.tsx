@@ -43,10 +43,8 @@ export default function TrackingPage() {
           // Mapeo de estados en inglés a español
           const statusTranslation: Record<string, string> = {
             WAITING: "Pendiente",
-            delivered: "Entregado",
-            in_transit: "En tránsito",
-            canceled: "Cancelado",
-            failed: "Fallido",
+            DELIVERED: "Entregado",
+            IN_TRANSIT: "En tránsito",
           };
 
           // Asegurar que cada objeto tenga formattedAddress y current_status traducido
@@ -181,6 +179,13 @@ export default function TrackingPage() {
             page: pagination.page,
             pageSize: pagination.pageSize,
           }}
+          onPaginationModelChange={(newPagination) =>
+            setPagination((prev) => ({
+              ...prev,
+              page: newPagination.page,
+              pageSize: newPagination.pageSize,
+            }))
+          }
           rowCount={pagination.total}
           paginationMode="client"
           sx={{
