@@ -1,5 +1,8 @@
 import axios from "axios";
-import { ShipmentCreatedDTO } from "./dto/shipment-dto";
+import {
+  ShipmentCreatedDTO,
+  ShipmentCreatedHistoryDTO,
+} from "./dto/shipment-dto";
 
 const API_URL = import.meta.env.VITE_PUBLIC_URL_API;
 
@@ -58,4 +61,21 @@ export const getShipmentById = async (
     console.error("Error getting shipment");
   }
   return { shipments: [] };
+};
+
+export const createShipmentHistory = async (
+  dataShipment: ShipmentCreatedHistoryDTO
+): Promise<any> => {
+  try {
+    console.log("Creating history", dataShipment);
+    const response = await axios.post(`${API_URL}history`, dataShipment);
+    console.log("response history", response);
+    if (response.status !== 201) {
+      return null;
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error creating shipment history", error);
+  }
+  return null;
 };
