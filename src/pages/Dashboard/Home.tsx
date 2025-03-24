@@ -9,12 +9,14 @@ import {
 import { Button, Select, MenuItem } from "@mui/material";
 import {
   createRouteAssignment,
+  createShipmentHistory,
   getRoutes,
   getShipmentsWaiting,
   updateShipmentStatus,
 } from "../../api/shipmentAction";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ShipmentCreatedHistoryDTO } from "../../api/dto/shipment-dto";
 
 interface Order {
   id: string;
@@ -50,6 +52,16 @@ const OrdersAdmin: React.FC = () => {
 
         // Luego, asignar la ruta al envío
         await createRouteAssignment(Number(orderId), Number(routeId));
+
+        // crear historial
+        const shipmentHistoryData: ShipmentCreatedHistoryDTO = {
+          shipment_id: Number(orderId),
+          status: "En Transito",
+        };
+        const historyResponse = await createShipmentHistory(
+          shipmentHistoryData
+        );
+        console.log("Respuesta de creación de historial:", historyResponse);
       }
       toast.success("Asignaciones creadas correctamente", {
         position: "top-right",
