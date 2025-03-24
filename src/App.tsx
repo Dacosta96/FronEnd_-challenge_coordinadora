@@ -16,6 +16,7 @@ import AvailableRoutes from "./pages/Dashboard/PageRoutes";
 import ViewShipments from "./pages/Dashboard/viewShipments";
 import KPIComponent from "./pages/Charts/Indicators";
 import Graphics from "./pages/Charts/Graphics";
+import DeliveredAdmin from "./pages/Dashboard/pageDelivered";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route element={<AppLayout />}>
               <Route index path="/" element={<Home />} />
+              <Route index path="/delivered" element={<DeliveredAdmin />} />
               <Route index path="/viewOrdes" element={<ViewShipments />} />
               <Route index path="/routes" element={<AvailableRoutes />} />
               <Route path="/profile-admin" element={<ProfilePage />} />

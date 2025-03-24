@@ -131,6 +131,21 @@ export const getShipmentsWaiting = async (): Promise<any> => {
   return { shipments: [] };
 };
 
+export const getShipmentsInTransit = async (): Promise<any> => {
+  try {
+    const response = await axios.get(`${API_URL}shipments/in-transit`);
+    if (response.status !== 200) {
+      console.error("Error getting shipments");
+      return { shipments: [] };
+    }
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    console.error("Error getting shipments");
+  }
+  return { shipments: [] };
+};
+
 export const getRoutes = async (): Promise<any> => {
   try {
     const response = await axios.get(`${API_URL}shipments/routes`);
@@ -152,7 +167,25 @@ export const updateShipmentStatus = async (
 ): Promise<any> => {
   try {
     console.log("Updating shipment status", { id, status });
-    const response = await axios.put(`${API_URL} /${id}`, { status });
+    const response = await axios.put(`${API_URL}shipments/${id}`, { status });
+    console.log("response", response);
+
+    if (response.status !== 200) {
+      return null;
+    }
+    return response.data;
+  } catch (error) {
+    console.error("Error updating shipment status", error);
+  }
+  return null;
+};
+
+export const updateShipmentDelivered = async (id: number): Promise<any> => {
+  try {
+    console.log("Updating shipment status", { id });
+    const response = await axios.put(
+      `${API_URL}shipments/${id}/mark_delivered`
+    );
     console.log("response", response);
 
     if (response.status !== 200) {
