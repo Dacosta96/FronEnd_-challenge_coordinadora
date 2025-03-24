@@ -46,3 +46,8 @@ export interface ShipmentStatusHistoryDTO {
   status: string;
   updatedAt: string;
 }
+
+export interface ShipmentCreatedHistoryDTO {
+  shipment_id: number;
+  status: string;
+}

@@ -4,7 +4,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "@clerk/clerk-react";
 import Button from "../../components/ui/button/Button";
 import { getUserByEmail } from "../../api/usersAction";
-import { createShipment } from "../../api/shipmentAction";
+import {
+  createShipment,
+  createShipmentHistory,
+} from "../../api/shipmentAction";
+import { ShipmentCreatedHistoryDTO } from "../../api/dto/shipment-dto";
 
 export default function PageHome() {
   const { user } = useUser();
@@ -103,7 +107,14 @@ export default function PageHome() {
         setLoading(false);
         return;
       }
+      // Crear historial del envío
+      const shipmentHistoryData: ShipmentCreatedHistoryDTO = {
+        shipment_id: response.shipment.id,
+        status: "En espera",
+      };
 
+      const historyResponse = await createShipmentHistory(shipmentHistoryData);
+      console.log("Respuesta de creación de historial:", historyResponse);
       toast.success("Envío registrado correctamente");
       setLoading(false);
       // Resetear el formulario

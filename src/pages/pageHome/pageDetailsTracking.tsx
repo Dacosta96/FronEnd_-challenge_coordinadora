@@ -148,7 +148,8 @@ function ShipmentDetails() {
               {shipment.google_map_address && (
                 <p>
                   <span className="font-medium">Dirección Google Maps:</span>{" "}
-                  {shipment.google_map_address}
+                  {(shipment.google_map_address as { formattedAddress: string })
+                    .formattedAddress || "No disponible"}
                 </p>
               )}
             </div>
