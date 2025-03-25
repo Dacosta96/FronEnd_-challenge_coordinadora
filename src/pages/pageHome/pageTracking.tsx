@@ -78,7 +78,19 @@ export default function TrackingPage() {
     }
     try {
       const response = await getShipmentById(searchId, userId || 0);
-      setShipments(response);
+      const statusTranslation: Record<string, string> = {
+        WAITING: "Pendiente",
+        DELIVERED: "Entregado",
+        IN_TRANSIT: "En tránsito",
+      };
+      const transformedShipmentss = response.map((shipment: any) => ({
+        ...shipment,
+        formattedAddress:
+          shipment.google_map_address?.formattedAddress || "No disponible",
+        current_status:
+          statusTranslation[shipment.current_status] || "Desconocido",
+      }));
+      setShipments(transformedShipmentss);
     } catch (error) {
       console.error("Error obteniendo datos:", error);
     }
